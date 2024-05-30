@@ -10,7 +10,7 @@ readme = "README.md"
 packages = [{ include = "harlequin_databend", from = "src" }]
 
 [tool.poetry.plugins."harlequin.adapter"]
-databend-adapter = "harlequin_databend:HarlequinDatabendAdapter"
+databend = "harlequin_databend:HarlequinDatabendAdapter"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
