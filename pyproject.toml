@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "harlequin-databend"
-version = "0.1.0"
+version = "0.1.2"
 description = "A Harlequin adapter for Databend."
 authors = ["hanxuanliang <hxuanliang@163.com>"]
 license = "MIT"
