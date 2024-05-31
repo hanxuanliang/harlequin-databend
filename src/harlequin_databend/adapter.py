@@ -153,7 +153,7 @@ class HarlequinDatabendConnection(HarlequinConnection):
                         qualified_identifier=f"{dbname}.{schema}.{table_name}.{col}",
                         query_name=col,
                         label=col,
-                        type_label=self._get_short_type(col_type),
+                        type_label=col_type,
                     )
                     for (col, col_type) in self._get_columns(dbname, schema, table_name)
                 ],
