@@ -10,7 +10,7 @@ host = TextOption(
         "Unix-domain socket."
     ),
     short_decls=["-h"],
-    default="localhost",
+    default="127.0.0.1",
 )
 
 
@@ -20,18 +20,19 @@ port = TextOption(
         "Port number to connect to at the server host, or socket file name extension "
         "for Unix-domain connections."
     ),
-    short_decls=["-p"],
+    short_decls=["-P", "--port"],
     default="8000",
 )
 
 user = TextOption(
     name="user",
     description=("databend user name to connect as."),
-    short_decls=["-u", "--username", "-U"],
+    short_decls=["-U", "--user"],
 )
 
 password = TextOption(
     name="password",
+    short_decls=["-p", "--password"],
     description=("Password to be used if the server demands password authentication."),
 )
 

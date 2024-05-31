@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "harlequin-databend"
-version = "0.1.2"
+version = "0.1.17"
 description = "A Harlequin adapter for Databend."
 authors = ["hanxuanliang <hxuanliang@163.com>"]
 license = "MIT"
@@ -14,8 +14,10 @@ databend = "harlequin_databend:HarlequinDatabendAdapter"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-harlequin = "^1.7"
 databend-py = "^0.6.0"
+harlequin = "^1.20.0"
+pandas = "^2.2.2"
+pyarrow = "^16.1.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.6"

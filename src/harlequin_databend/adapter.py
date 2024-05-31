@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import os
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, List, Sequence, Tuple
 
+import pandas as pd
+import pyarrow
 from databend_py import Client
 from harlequin import (
     HarlequinAdapter,
@@ -12,36 +13,67 @@ from harlequin import (
 )
 from harlequin.catalog import Catalog, CatalogItem
 from harlequin.exception import HarlequinConnectionError
+from textual_fastdatatable.backend import AutoBackendType
 
 from harlequin_databend.cli_options import DATABEND_OPTIONS
 from harlequin_databend.completions import _get_completions
 
 
+class HarlequinDatabendCursor(HarlequinCursor):
+    def __init__(self, conn: HarlequinDatabendConnection, query: str) -> None:
+        self.results = conn.execute(query, with_column_types=True)
+        self._limit: int | None = None
+
+    def columns(self) -> list[tuple[str, str]]:
+        return self.results[0]
+
+    def set_limit(self, limit: int) -> HarlequinDatabendCursor:
+        self._limit = limit
+        return self
+
+    def fetchall(self) -> AutoBackendType | None:
+        return pyarrow.Table.from_pandas(
+            pd.DataFrame(
+                data=[list(row) for row in self.results[1]],
+                columns=[col[0] for col in self.results[0]],
+            )
+        )
+
+
 class HarlequinDatabendConnection(HarlequinConnection):
-    def __init__(self, conn_str: Sequence[str], options: Dict[str, Any]) -> None:
-        self.init_message = "Hello from Databend!"
+    def __init__(
+        self,
+        conn_str: Sequence[str],
+        *_: Any,
+        init_message: str = "",
+        options: dict[str, Any],
+    ) -> None:
+        self.init_message = "Hello from Databend!" if not init_message else init_message
         try:
             if conn_str and conn_str[0]:
                 self.conn = Client(conn_str[0])
             else:
-                hostname = options.get("host", "localhost")
+                hostname = options.get("host", "127.0.0.1")
                 database = options.get("dbname", "default")
-                username = options.get("user", "")
+                port = options.get("port", "8000")
+                username = options.get("user", None)
                 password = options.get("password", None)
                 self.conn = Client(
                     host=hostname,
+                    port=int(port) if port is not None else 8000,
                     database=database,
-                    user=username,
-                    password=password if password else os.environ["DATABEND_PASSWORD"],
+                    user=username if username else "",
+                    password=password if password else "",
                 )
 
         except Exception as e:
             raise HarlequinConnectionError(
-                msg=str(e), title="Harlequin could not connect to databend."
+                msg=str(e),
+                title="Harlequin could not connect to databend.",
             ) from e
 
     def execute(self, query: str) -> HarlequinCursor:
-        return self.conn.execute(query)
+        return HarlequinDatabendCursor(self.conn, query)
 
     def get_catalog(self) -> Catalog:
         databases = self._get_databases()
@@ -86,9 +118,9 @@ class HarlequinDatabendConnection(HarlequinConnection):
             select schema_name
             from information_schema.schemata
             where
-                table_catalog = '{dbname}'
-                and table_schema != 'information_schema'
-            order by table_schema asc
+                catalog_name = '{dbname}'
+                and schema_name != 'information_schema'
+            order by schema_name asc
             ;"""
         )
         return res
@@ -199,11 +231,11 @@ class HarlequinDatabendAdapter(HarlequinAdapter):
     def __init__(
         self,
         conn_str: Sequence[str],
-        host: str = "localhost",
-        port: str = "8000",
-        dbname: str = "default",
-        user: str = None,
-        password: str = None,
+        host: str | None = None,
+        port: str | None = None,
+        dbname: str | None = None,
+        user: str | None = None,
+        password: str | None = None,
         **_: Any,
     ) -> None:
         self.conn_str = conn_str
