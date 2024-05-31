@@ -48,7 +48,9 @@ class HarlequinDatabendConnection(HarlequinConnection):
         init_message: str = "",
         options: dict[str, Any],
     ) -> None:
-        self.init_message = "Hello from Databend!" if not init_message else init_message
+        self.init_message = (
+            f"Hello from Databend!{options}" if not init_message else init_message
+        )
         try:
             if conn_str and conn_str[0]:
                 self.conn = Client(conn_str[0])
@@ -62,8 +64,8 @@ class HarlequinDatabendConnection(HarlequinConnection):
                     host=hostname,
                     port=int(port) if port is not None else 8000,
                     database=database,
-                    user=username if username else "",
-                    password=password if password else "",
+                    user=username if username is not None else "root",
+                    password=password if password is not None else "",
                 )
 
         except Exception as e:
@@ -177,52 +179,6 @@ class HarlequinDatabendConnection(HarlequinConnection):
             ;"""
         )
         return res
-
-    @staticmethod
-    def _get_short_type(type_name: str) -> str:
-        MAPPING = {
-            "bigint": "##",
-            "bigserial": "##",
-            "bit": "010",
-            "boolean": "t/f",
-            "box": "□",
-            "bytea": "b",
-            "character": "s",
-            "cidr": "ip",
-            "circle": "○",
-            "date": "d",
-            "double": "#.#",
-            "inet": "ip",
-            "integer": "#",
-            "interval": "|-|",
-            "json": "{}",
-            "jsonb": "b{}",
-            "line": "—",
-            "lseg": "-",
-            "macaddr": "mac",
-            "macaddr8": "mac",
-            "money": "$$",
-            "numeric": "#.#",
-            "path": "╭",
-            "pg_lsn": "lsn",
-            "pg_snapshot": "snp",
-            "point": "•",
-            "polygon": "▽",
-            "real": "#.#",
-            "smallint": "#",
-            "smallserial": "#",
-            "serial": "#",
-            "text": "s",
-            "time": "t",
-            "timestamp": "ts",
-            "tsquery": "tsq",
-            "tsvector": "tsv",
-            "txid_snapshot": "snp",
-            "uuid": "uid",
-            "xml": "xml",
-            "array": "[]",
-        }
-        return MAPPING.get(type_name.split("(")[0].split(" ")[0], "?")
 
 
 class HarlequinDatabendAdapter(HarlequinAdapter):
