@@ -35,16 +35,10 @@ pipx inject harlequin harlequin-databend
 
 ## Usage and Configuration
 
-You can open Harlequin with the Databend adapter by selecting it with the `-a` option and passing a [Databend DSN](https://docs.databend.com/guides/sql-clients/developers/python#step-2-configuring-connection-string-for-databend-py):
+You can open Harlequin with the Databend adapter by selecting it with the `-a` option and pass all or parts of the connection string as separate options:
 
 ```bash
-harlequin -a databend "http://root@localhost:8000/db?secure=False&copy_purge=True&debug=True"
-```
-
-You can also pass all or parts of the connection string as separate options:
-
-```bash
-harlequin -a databend -h localhost -p 8000 -u root --password my-pass -d default
+harlequin -a databend -h localhost -P 8000 --user databend -p databend
 ```
 
 Many more options are available; to see the full list, run:
